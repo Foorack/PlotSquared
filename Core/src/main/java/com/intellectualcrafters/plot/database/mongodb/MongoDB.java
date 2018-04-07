@@ -17,6 +17,10 @@ import java.util.UUID;
 
 public class MongoDB implements AbstractDB {
 
+    public MongoDB(String host, String prefix, String port, String user, String password, boolean ssl) {
+
+    }
+
     public void setOwner(Plot plot, UUID uuid) {
         throw new UnsupportedOperationException();
     }
