@@ -11,9 +11,21 @@ import com.intellectualcrafters.plot.object.comment.PlotComment;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
+import com.mongodb.async.client.MongoClient;
+import com.mongodb.async.client.MongoClients;
+import com.mongodb.async.client.MongoClientSettings;
+import com.mongodb.async.client.MongoCollection;
+import com.mongodb.async.client.MongoDatabase;
+import com.mongodb.connection.ClusterSettings;
+import com.mongodb.connection.SslSettings;
+import org.bson.Document;
 
 /**
  * MongoDB database implementation.
@@ -23,20 +35,68 @@ import java.util.UUID;
  */
 public class MongoDB implements AbstractDB {
 
+    // Parameter variables.
     private final String host;
+    private final String database;
     private final String prefix;
     private final String port;
     private final String user;
     private final String password;
     private final boolean ssl;
+    // Connection variables.
+    private MongoClient mongoClient;
 
-    public MongoDB(String host, String prefix, String port, String user, String password, boolean ssl) {
+    public MongoDB(String host, String database, String prefix, String port, String user, String password, boolean ssl) {
         this.host = host;
+        this.database = database;
         this.prefix = prefix;
         this.port = port;
         this.user = user;
         this.password = password;
         this.ssl = ssl;
+        openConnection();
+    }
+
+    private void openConnection() {
+        // close first if already opened
+        if(mongoClient != null) {
+            close();
+        }
+        MongoClientSettings.Builder settingsBuilder = MongoClientSettings.builder().applicationName("PlotSquared").sslSettings(SslSettings.builder().enabled(ssl).build());
+        // ssl
+        if(!user.isEmpty()) {
+            settingsBuilder.credential(MongoCredential.createCredential(user, database, password.toCharArray()));
+        }
+        // hosts
+        String[] hosts = host.split(",");
+        String[] ports = port.split(",");
+        if(hosts.length != ports.length) {
+            throw new IllegalArgumentException("Unequal amount of hosts and ports specified in MongoDB configuration.");
+        }
+        List<ServerAddress> addresses = new ArrayList<>();
+        for (int i = 0; i != hosts.length; i++) {
+            try {
+                addresses.add(new ServerAddress(hosts[i], Integer.parseInt(ports[i])));
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Non-integer port specified in MongoDB configuration settings.");
+            }
+        }
+        settingsBuilder.clusterSettings(ClusterSettings.builder().hosts(addresses).build());
+        mongoClient = MongoClients.create(settingsBuilder.build());
+    }
+
+    private MongoDatabase getDatabase() {
+        if(mongoClient == null) {
+            throw IllegalStateException("Failed to return database. Connection is closed.");
+        }
+        return mongoClient.getDatabase(database);
+    }
+
+    private MongoCollection<Document> getCollection(String collection) {
+        if(mongoClient == null) {
+            throw IllegalStateException("Failed to return collection. Connection is closed.");
+        }
+        return getDatabase().getCollection(prefix + collection);
     }
 
     @Override
@@ -306,7 +366,8 @@ public class MongoDB implements AbstractDB {
 
     @Override
     public void close() {
-        throw new UnsupportedOperationException();
+        mongoClient.close();
+        mongoClient = null;
     }
 
     @Override

@@ -1602,7 +1602,7 @@ public class PS{
                 Database database = new com.intellectualcrafters.plot.database.sql.SQLite(file);
                 DBFunc.dbManager = new SQLManager(database, Storage.PREFIX, false);
             } else if (Storage.MongoDB.USE) {
-                DBFunc.dbManager = new MongoDB(Storage.MongoDB.HOST, Storage.PREFIX, Storage.MongoDB.PORT, Storage.MongoDB.USER, Storage.MongoDB.PASSWORD, Storage.MongoDB.SSL);
+                DBFunc.dbManager = new MongoDB(Storage.MongoDB.HOST, Storage.MongoDB.DATABASE, Storage.PREFIX, Storage.MongoDB.PORT, Storage.MongoDB.USER, Storage.MongoDB.PASSWORD, Storage.MongoDB.SSL);
             } else {
                 PS.log(C.PREFIX + "&cNo storage type is set!");
                 this.IMP.disable();
