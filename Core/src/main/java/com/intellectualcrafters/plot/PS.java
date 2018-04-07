@@ -9,6 +9,7 @@ import com.intellectualcrafters.plot.config.Configuration;
 import com.intellectualcrafters.plot.config.Settings;
 import com.intellectualcrafters.plot.config.Storage;
 import com.intellectualcrafters.plot.database.DBFunc;
+import com.intellectualcrafters.plot.database.mongodb.MongoDB;
 import com.intellectualcrafters.plot.database.sql.Database;
 import com.intellectualcrafters.plot.database.sql.SQLManager;
 import com.intellectualcrafters.plot.generator.GeneratorWrapper;
@@ -1600,6 +1601,8 @@ public class PS{
                 File file = MainUtil.getFile(IMP.getDirectory(), Storage.SQLite.DB + ".db");
                 Database database = new com.intellectualcrafters.plot.database.sql.SQLite(file);
                 DBFunc.dbManager = new SQLManager(database, Storage.PREFIX, false);
+            } else if (Storage.MongoDB.USE) {
+                DBFunc.dbManager = new MongoDB(Storage.MongoDB.HOST, Storage.PREFIX, Storage.MongoDB.PORT, Storage.MongoDB.USER, Storage.MongoDB.PASSWORD, Storage.MongoDB.SSL);
             } else {
                 PS.log(C.PREFIX + "&cNo storage type is set!");
                 this.IMP.disable();
@@ -1623,6 +1626,8 @@ public class PS{
                 PS.log("$4MYSQL");
             } else if (Storage.SQLite.USE) {
                 PS.log("$4SQLITE");
+            } else if (Storage.MongoDB.USE) {
+                PS.log("$4MONGODB");
             }
             PS.log("&d==== Here is an ugly stacktrace, if you are interested in those things ===");
             e.printStackTrace();

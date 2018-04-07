@@ -39,4 +39,18 @@ public class Storage extends Config {
         public static String DB = "storage";
     }
 
+    @Comment("MongoDB section")
+    public static final class MongoDB {
+        @Comment("Should MongoDB be used?")
+        public static boolean USE = false;
+        @Comment("If you are using a replica-set or multiple mongos then comma-separate both the hosts and the ports.")
+        public static String HOST = "localhost";
+        public static String PORT = "27017";
+        @Comment("If you have not configured authentication then leave both username and password blank.")
+        public static String USER = "";
+        public static String PASSWORD = "";
+        public static String DATABASE = "plot_db";
+        public static boolean SSL = false;
+    }
+
 }
