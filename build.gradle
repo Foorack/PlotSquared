@@ -54,6 +54,7 @@ subprojects {
             exclude(module: 'dummypermscompat')
         }
         compile 'com.google.guava:guava:10.0'
+        compile 'org.mongodb:mongo-java-driver:3.6.3'
     }
     clean{
         delete file("../target")
