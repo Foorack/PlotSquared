@@ -1,10 +1,11 @@
-package com.intellectualcrafters.plot.database;
+package com.intellectualcrafters.plot.database.sql;
 
 import com.google.common.base.Charsets;
 import com.intellectualcrafters.configuration.ConfigurationSection;
 import com.intellectualcrafters.plot.PS;
 import com.intellectualcrafters.plot.config.Settings;
 import com.intellectualcrafters.plot.config.Storage;
+import com.intellectualcrafters.plot.database.AbstractDB;
 import com.intellectualcrafters.plot.flag.Flag;
 import com.intellectualcrafters.plot.flag.FlagManager;
 import com.intellectualcrafters.plot.flag.StringFlag;

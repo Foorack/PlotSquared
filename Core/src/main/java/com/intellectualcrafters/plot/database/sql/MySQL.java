@@ -1,4 +1,4 @@
-package com.intellectualcrafters.plot.database;
+package com.intellectualcrafters.plot.database.sql;
 
 import com.intellectualcrafters.plot.config.Storage;
 import com.intellectualcrafters.plot.util.StringMan;

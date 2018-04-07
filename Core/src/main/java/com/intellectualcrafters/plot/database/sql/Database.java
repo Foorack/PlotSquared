@@ -1,4 +1,4 @@
-package com.intellectualcrafters.plot.database;
+package com.intellectualcrafters.plot.database.sql;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

@@ -2,9 +2,9 @@ package com.intellectualcrafters.plot.commands;
 
 import com.intellectualcrafters.plot.PS;
 import com.intellectualcrafters.plot.database.DBFunc;
-import com.intellectualcrafters.plot.database.MySQL;
-import com.intellectualcrafters.plot.database.SQLManager;
-import com.intellectualcrafters.plot.database.SQLite;
+import com.intellectualcrafters.plot.database.sql.MySQL;
+import com.intellectualcrafters.plot.database.sql.SQLManager;
+import com.intellectualcrafters.plot.database.sql.SQLite;
 import com.intellectualcrafters.plot.object.Plot;
 import com.intellectualcrafters.plot.object.PlotArea;
 import com.intellectualcrafters.plot.object.PlotId;
@@ -76,7 +76,6 @@ public class Database extends SubCommand {
             return false;
         }
         try {
-            com.intellectualcrafters.plot.database.Database implementation;
             String prefix = "";
             switch (args[0].toLowerCase()) {
                 case "import":
@@ -90,9 +89,7 @@ public class Database extends SubCommand {
                         return false;
                     }
                     MainUtil.sendMessage(player, "&6Starting...");
-                    implementation = new SQLite(file);
-                    SQLManager manager = new SQLManager(implementation, args.length == 3 ? args[2] : "", true);
-                    HashMap<String, HashMap<PlotId, Plot>> map = manager.getPlots();
+                    HashMap<String, HashMap<PlotId, Plot>> map = new SQLManager(new SQLite(file), args.length == 3 ? args[2] : "", true).getPlots();
                     plots = new ArrayList<>();
                     for (Entry<String, HashMap<PlotId, Plot>> entry : map.entrySet()) {
                         String areaname = entry.getKey();
@@ -153,29 +150,37 @@ public class Database extends SubCommand {
                     if (args.length > 6) {
                         prefix = args[6];
                     }
-                    implementation = new MySQL(host, port, database, username, password);
-                    break;
+                    try {
+                        SQLManager manager = new SQLManager(new MySQL(host, port, database, username, password), prefix, true);
+                        Database.insertPlots(manager, plots, player);
+                        return true;
+                    } catch (ClassNotFoundException | SQLException e) {
+                        MainUtil.sendMessage(player, "$1Failed to save plots, read stacktrace for info");
+                        MainUtil.sendMessage(player, "&d==== Here is an ugly stacktrace, if you are interested in those things ===");
+                        e.printStackTrace();
+                        MainUtil.sendMessage(player, "&d==== End of stacktrace ====");
+                        MainUtil.sendMessage(player, "$1Please make sure you are using the correct arguments!");
+                        return false;
+                    }
                 case "sqlite":
                     if (args.length < 2) {
                         return MainUtil.sendMessage(player, "/plot database sqlite [file]");
                     }
                     File sqliteFile = MainUtil.getFile(PS.get().IMP.getDirectory(), args[1] + ".db");
-                    implementation = new SQLite(sqliteFile);
-                    break;
+                    try {
+                        SQLManager manager = new SQLManager(new SQLite(sqliteFile), prefix, true);
+                        Database.insertPlots(manager, plots, player);
+                        return true;
+                    } catch (ClassNotFoundException | SQLException e) {
+                        MainUtil.sendMessage(player, "$1Failed to save plots, read stacktrace for info");
+                        MainUtil.sendMessage(player, "&d==== Here is an ugly stacktrace, if you are interested in those things ===");
+                        e.printStackTrace();
+                        MainUtil.sendMessage(player, "&d==== End of stacktrace ====");
+                        MainUtil.sendMessage(player, "$1Please make sure you are using the correct arguments!");
+                        return false;
+                    }
                 default:
                     return MainUtil.sendMessage(player, "/plot database [sqlite/mysql]");
-            }
-            try {
-                SQLManager manager = new SQLManager(implementation, prefix, true);
-                Database.insertPlots(manager, plots, player);
-                return true;
-            } catch (ClassNotFoundException | SQLException e) {
-                MainUtil.sendMessage(player, "$1Failed to save plots, read stacktrace for info");
-                MainUtil.sendMessage(player, "&d==== Here is an ugly stacktrace, if you are interested in those things ===");
-                e.printStackTrace();
-                MainUtil.sendMessage(player, "&d==== End of stacktrace ====");
-                MainUtil.sendMessage(player, "$1Please make sure you are using the correct arguments!");
-                return false;
             }
         } catch (ClassNotFoundException | SQLException e) {
             MainUtil.sendMessage(player, "$1Failed to open connection, read stacktrace for info");

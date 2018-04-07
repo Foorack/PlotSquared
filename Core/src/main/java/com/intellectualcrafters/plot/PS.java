@@ -9,8 +9,8 @@ import com.intellectualcrafters.plot.config.Configuration;
 import com.intellectualcrafters.plot.config.Settings;
 import com.intellectualcrafters.plot.config.Storage;
 import com.intellectualcrafters.plot.database.DBFunc;
-import com.intellectualcrafters.plot.database.Database;
-import com.intellectualcrafters.plot.database.SQLManager;
+import com.intellectualcrafters.plot.database.sql.Database;
+import com.intellectualcrafters.plot.database.sql.SQLManager;
 import com.intellectualcrafters.plot.generator.GeneratorWrapper;
 import com.intellectualcrafters.plot.generator.HybridPlotWorld;
 import com.intellectualcrafters.plot.generator.HybridUtils;
@@ -1592,19 +1592,19 @@ public class PS{
             if (DBFunc.dbManager != null) {
                 DBFunc.dbManager.close();
             }
-            Database database;
             if (Storage.MySQL.USE) {
-                database = new com.intellectualcrafters.plot.database.MySQL(Storage.MySQL.HOST, Storage.MySQL.PORT, Storage.MySQL.DATABASE,
+                Database database = new com.intellectualcrafters.plot.database.sql.MySQL(Storage.MySQL.HOST, Storage.MySQL.PORT, Storage.MySQL.DATABASE,
                         Storage.MySQL.USER, Storage.MySQL.PASSWORD);
+                DBFunc.dbManager = new SQLManager(database, Storage.PREFIX, false);
             } else if (Storage.SQLite.USE) {
                 File file = MainUtil.getFile(IMP.getDirectory(), Storage.SQLite.DB + ".db");
-                database = new com.intellectualcrafters.plot.database.SQLite(file);
+                Database database = new com.intellectualcrafters.plot.database.sql.SQLite(file);
+                DBFunc.dbManager = new SQLManager(database, Storage.PREFIX, false);
             } else {
                 PS.log(C.PREFIX + "&cNo storage type is set!");
                 this.IMP.disable();
                 return;
             }
-            DBFunc.dbManager = new SQLManager(database, Storage.PREFIX, false);
             this.plots_tmp = DBFunc.getPlots();
             if (manager instanceof SinglePlotAreaManager) {
                 SinglePlotArea area = ((SinglePlotAreaManager) manager).getArea();
